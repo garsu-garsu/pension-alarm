@@ -5,7 +5,13 @@ import { Button, Paragraph, useToast } from "@toss/tds-mobile";
 import { PensionNumber } from "../../components/PensionNumber";
 import { Card, ScreenLayout } from "../../components/ScreenLayout";
 import { EVENT, track } from "../../lib/analytics";
-import { fetchLatestDraw, rankOf, type Draw, type Rank } from "../../lib/pension";
+import {
+  fetchLatestDraw,
+  rankOf,
+  type Draw,
+  type Rank,
+} from "../../lib/pension";
+import { useTour, useTourTarget } from "../../lib/tour";
 import { palette } from "../../theme";
 
 interface Ticket {
@@ -53,6 +59,19 @@ export function MyNumbersScreen() {
   // 회차 대조가 끝난 뒤 딱 한 번만 기록하기 위한 플래그
   const checkedRef = useRef(false);
 
+  const tour = useTour();
+  const setTourTarget = useTourTarget("mynumbers-input");
+  const inputCardRef = useRef<HTMLDivElement | null>(null);
+  const tourKey = tour.current?.key;
+  useEffect(() => {
+    if (tourKey === "mynumbers-input") {
+      inputCardRef.current?.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+      });
+    }
+  }, [tourKey]);
+
   useEffect(() => {
     fetchLatestDraw()
       .then(setDraw)
@@ -98,58 +117,67 @@ export function MyNumbersScreen() {
       title="내 번호 확인"
       subtitle="산 번호를 저장해 두면 발표 직후 몇 등인지 알려드려요"
     >
-      <Card style={{ marginTop: 8 }}>
-        <Paragraph typography="t6" fontWeight="bold" color={palette.ink}>
-          조를 골라주세요
-        </Paragraph>
-        <div style={{ display: "flex", gap: 8, marginTop: 12 }}>
-          {[1, 2, 3, 4, 5].map((g) => (
-            <div key={g} style={{ flex: 1 }}>
-              <Button
-                display="block"
-                variant={group === g ? "fill" : "weak"}
-                color={group === g ? "primary" : "dark"}
-                onClick={() => setGroup(g)}
-              >
-                {g}조
-              </Button>
-            </div>
-          ))}
-        </div>
+      <div
+        ref={(el) => {
+          inputCardRef.current = el;
+          setTourTarget(el);
+        }}
+      >
+        <Card style={{ marginTop: 8 }}>
+          <Paragraph typography="t6" fontWeight="bold" color={palette.ink}>
+            조를 골라주세요
+          </Paragraph>
+          <div style={{ display: "flex", gap: 6, marginTop: 12 }}>
+            {[1, 2, 3, 4, 5].map((g) => (
+              // minWidth: 0 이 없으면 flex 항목이 버튼 글자 너비 밑으로 안 줄어들어서
+              // 다섯 개가 카드를 삐져나가고 화면에 가로 스크롤이 생겨요.
+              <div key={g} style={{ flex: 1, minWidth: 0 }}>
+                <Button
+                  display="block"
+                  variant={group === g ? "fill" : "weak"}
+                  color={group === g ? "primary" : "dark"}
+                  onClick={() => setGroup(g)}
+                >
+                  {g}조
+                </Button>
+              </div>
+            ))}
+          </div>
 
-        <Paragraph
-          typography="t6"
-          fontWeight="bold"
-          color={palette.ink}
-          style={{ marginTop: 20 }}
-        >
-          여섯 자리를 입력해 주세요
-        </Paragraph>
-        <input
-          type="text"
-          inputMode="numeric"
-          maxLength={6}
-          value={digits}
-          onChange={(e) => onDigitsChange(e.target.value)}
-          placeholder="000000"
-          style={{
-            marginTop: 10,
-            width: "100%",
-            boxSizing: "border-box",
-            padding: "12px 14px",
-            fontSize: 20,
-            letterSpacing: 4,
-            borderRadius: 12,
-            border: `1px solid ${palette.line}`,
-            outline: "none",
-          }}
-        />
-        <div style={{ marginTop: 14 }}>
-          <Button display="full" onClick={onSave}>
-            저장
-          </Button>
-        </div>
-      </Card>
+          <Paragraph
+            typography="t6"
+            fontWeight="bold"
+            color={palette.ink}
+            style={{ marginTop: 20 }}
+          >
+            여섯 자리를 입력해 주세요
+          </Paragraph>
+          <input
+            type="text"
+            inputMode="numeric"
+            maxLength={6}
+            value={digits}
+            onChange={(e) => onDigitsChange(e.target.value)}
+            placeholder="000000"
+            style={{
+              marginTop: 10,
+              width: "100%",
+              boxSizing: "border-box",
+              padding: "12px 14px",
+              fontSize: 20,
+              letterSpacing: 4,
+              borderRadius: 12,
+              border: `1px solid ${palette.line}`,
+              outline: "none",
+            }}
+          />
+          <div style={{ marginTop: 14 }}>
+            <Button display="full" onClick={onSave}>
+              저장
+            </Button>
+          </div>
+        </Card>
+      </div>
 
       {tickets.length === 0 ? (
         <Card style={{ marginTop: 12, textAlign: "center" }}>
@@ -160,18 +188,31 @@ export function MyNumbersScreen() {
       ) : (
         tickets.map((ticket, i) => {
           const rank = draw ? rankOf(ticket.group, ticket.digits, draw) : null;
-          const reference = draw ? (rank === "bonus" ? draw.bonusNumber : draw.firstNumber) : null;
+          const reference = draw
+            ? rank === "bonus"
+              ? draw.bonusNumber
+              : draw.firstNumber
+            : null;
           return (
             <Card
               key={i}
-              style={{ marginTop: 12, display: "flex", alignItems: "center", gap: 12 }}
+              style={{
+                marginTop: 12,
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+              }}
             >
               <div style={{ flex: 1 }}>
                 <PensionNumber
                   group={ticket.group}
                   digits={ticket.digits}
                   size={30}
-                  dim={reference ? (idx) => ticket.digits[idx] !== reference[idx] : undefined}
+                  dim={
+                    reference
+                      ? (idx) => ticket.digits[idx] !== reference[idx]
+                      : undefined
+                  }
                 />
               </div>
               {draw && (

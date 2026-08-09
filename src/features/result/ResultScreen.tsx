@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { Device } from "@apps-in-toss/web-framework";
 import { Button, Paragraph, useToast } from "@toss/tds-mobile";
@@ -13,6 +13,7 @@ import {
   type Draw,
 } from "../../lib/pension";
 import { isInTossApp } from "../../lib/tossEnv";
+import { useTour, useTourTarget } from "../../lib/tour";
 import { palette } from "../../theme";
 
 const DHLOTTERY_URL = "https://dhlottery.co.kr";
@@ -25,7 +26,22 @@ export function ResultScreen() {
   const [error, setError] = useState(false);
   // 다시 시도 버튼을 누르면 이 값을 올려서 아래 effect 를 다시 돌려요.
   const [reloadKey, setReloadKey] = useState(0);
-  const [countdown, setCountdown] = useState(() => formatCountdown(msUntilNextDraw()));
+  const [countdown, setCountdown] = useState(() =>
+    formatCountdown(msUntilNextDraw()),
+  );
+
+  const tour = useTour();
+  const setTourTarget = useTourTarget("result-numbers");
+  const numbersCardRef = useRef<HTMLDivElement | null>(null);
+  const tourKey = tour.current?.key;
+  useEffect(() => {
+    if (tourKey === "result-numbers") {
+      numbersCardRef.current?.scrollIntoView({
+        block: "center",
+        behavior: "smooth",
+      });
+    }
+  }, [tourKey]);
 
   useEffect(() => {
     setError(false);
@@ -39,7 +55,10 @@ export function ResultScreen() {
   }, [reloadKey]);
 
   useEffect(() => {
-    const timer = setInterval(() => setCountdown(formatCountdown(msUntilNextDraw())), 1000);
+    const timer = setInterval(
+      () => setCountdown(formatCountdown(msUntilNextDraw())),
+      1000,
+    );
     return () => clearInterval(timer);
   }, []);
 
@@ -57,7 +76,10 @@ export function ResultScreen() {
   };
 
   return (
-    <ScreenLayout title="이번 주 당첨번호" subtitle={`다음 추첨까지 ${countdown}`}>
+    <ScreenLayout
+      title="이번 주 당첨번호"
+      subtitle={`다음 추첨까지 ${countdown}`}
+    >
       {error ? (
         <Card style={{ marginTop: 8, textAlign: "center" }}>
           <Paragraph typography="t6" color={palette.sub}>
@@ -77,20 +99,34 @@ export function ResultScreen() {
         </Card>
       ) : (
         <>
-          <Card style={{ marginTop: 8 }}>
-            <Paragraph typography="t6" fontWeight="bold" color={palette.ink}>
-              제{draw.drawNo}회 · {draw.date} 추첨
-            </Paragraph>
-            <div style={{ marginTop: 12 }}>
-              <PensionNumber group={draw.firstGroup} digits={draw.firstNumber} />
-            </div>
-            <Paragraph typography="t7" color={palette.sub} style={{ marginTop: 16 }}>
-              보너스
-            </Paragraph>
-            <div style={{ marginTop: 6 }}>
-              <PensionNumber digits={draw.bonusNumber} />
-            </div>
-          </Card>
+          <div
+            ref={(el) => {
+              numbersCardRef.current = el;
+              setTourTarget(el);
+            }}
+          >
+            <Card style={{ marginTop: 8 }}>
+              <Paragraph typography="t6" fontWeight="bold" color={palette.ink}>
+                제{draw.drawNo}회 · {draw.date} 추첨
+              </Paragraph>
+              <div style={{ marginTop: 12 }}>
+                <PensionNumber
+                  group={draw.firstGroup}
+                  digits={draw.firstNumber}
+                />
+              </div>
+              <Paragraph
+                typography="t7"
+                color={palette.sub}
+                style={{ marginTop: 16 }}
+              >
+                보너스
+              </Paragraph>
+              <div style={{ marginTop: 6 }}>
+                <PensionNumber digits={draw.bonusNumber} />
+              </div>
+            </Card>
+          </div>
 
           <Card style={{ marginTop: 12 }}>
             <Paragraph typography="t6" fontWeight="bold" color={palette.ink}>
@@ -122,7 +158,12 @@ export function ResultScreen() {
           당첨결과와 판매점 정보를 공식 사이트에서 볼 수 있어요.
         </Paragraph>
         <div style={{ marginTop: 12 }}>
-          <Button display="full" variant="weak" color="dark" onClick={openDhlottery}>
+          <Button
+            display="full"
+            variant="weak"
+            color="dark"
+            onClick={openDhlottery}
+          >
             동행복권 홈페이지 바로가기
           </Button>
         </div>
