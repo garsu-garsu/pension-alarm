@@ -17,17 +17,17 @@ export type NotifyConsent =
 
 /** 연금복권은 목요일 17시에 판매가 끝나요. 그 전에 살 시간이 남는 시각만 넣었어요. */
 export const BUY_SLOTS = [
-  { code: "pension-alarm-buy-wed1900", label: "수요일 저녁 7시" },
-  { code: "pension-alarm-buy-thu1000", label: "목요일 오전 10시" },
-  { code: "pension-alarm-buy-thu1400", label: "목요일 오후 2시" },
-  { code: "pension-alarm-buy-thu1600", label: "목요일 오후 4시" },
+  { code: "pension-alarm-buy-wed1900-p", label: "수요일 저녁 7시" },
+  { code: "pension-alarm-buy-thu1000-p", label: "목요일 오전 10시" },
+  { code: "pension-alarm-buy-thu1400-p", label: "목요일 오후 2시" },
+  { code: "pension-alarm-buy-thu1600-p", label: "목요일 오후 4시" },
 ] as const;
 
 /** 추첨은 목요일 저녁 7시 5분이에요. 발표 뒤 시각만 넣었어요. */
 export const CHECK_SLOTS = [
-  { code: "pension-alarm-check-thu2000", label: "목요일 저녁 8시" },
-  { code: "pension-alarm-check-fri0800", label: "금요일 오전 8시" },
-  { code: "pension-alarm-check-fri1000", label: "금요일 오전 10시" },
+  { code: "pension-alarm-check-thu2030-p", label: "목요일 저녁 8시 30분" },
+  { code: "pension-alarm-check-fri0800-p", label: "금요일 오전 8시" },
+  { code: "pension-alarm-check-fri1000-p", label: "금요일 오전 10시" },
 ] as const;
 
 export type NotifySlotCode =
