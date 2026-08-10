@@ -13,6 +13,9 @@ import { AD_GROUP_ID_BANNER, AD_GROUP_ID_BANNER_IMAGE } from "../lib/env";
  */
 const REFRESH_MS = 30_000;
 
+/** 하단 고정 배너가 잡아두는 높이 — 본문·플로팅 탭바가 이만큼 위로 올라와요. */
+export const BANNER_H = 96;
+
 interface Props {
   /** 광고그룹 ID. 비우면 문구 강조형(하단 고정) 지면을 써요. */
   adGroupId?: string;
@@ -30,7 +33,7 @@ interface Props {
  * - 기본값: 문구 강조형 — App.tsx 에서 화면 하단에 고정으로 하나만 띄워요.
  * - ImageBannerAd: 이미지 강조형 — 각 화면 본문 맨 아래에 붙여요.
  */
-export function BannerAd({ adGroupId, height = 96, grow }: Props = {}) {
+export function BannerAd({ adGroupId, height = BANNER_H, grow }: Props = {}) {
   const groupId = adGroupId ?? AD_GROUP_ID_BANNER;
   const targetRef = useRef<HTMLDivElement | null>(null);
   const [ready, setReady] = useState(false);

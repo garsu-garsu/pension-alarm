@@ -38,7 +38,9 @@ export function ScreenLayout({
         style={{
           flex: 1,
           overflowY: "auto",
-          padding: "8px 20px 24px",
+          // 아래 92px 은 떠 있는 탭바(BottomNav ≈ 69px + 아래위 여백) 자리 —
+          // 끝까지 내려도 마지막 내용이 탭바에 가리지 않아요.
+          padding: "8px 20px 92px",
           paddingTop: "max(8px, env(safe-area-inset-top))",
           WebkitOverflowScrolling: "touch",
         }}

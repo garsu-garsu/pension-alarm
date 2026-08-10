@@ -2,7 +2,7 @@ import { closeView, graniteEvent } from "@apps-in-toss/web-framework";
 import { useEffect } from "react";
 
 import "./App.css";
-import { BannerAd } from "./components/BannerAd";
+import { BANNER_H, BannerAd } from "./components/BannerAd";
 import { BottomNav } from "./components/BottomNav";
 import { CoachMark } from "./components/CoachMark";
 import { AlarmScreen } from "./features/alarm/AlarmScreen";
@@ -13,9 +13,6 @@ import { trackScreen } from "./lib/analytics";
 import { RouterProvider, useRouter, type Route } from "./router";
 import { TourProvider, useTour } from "./lib/tour";
 import { palette } from "./theme";
-
-/** BannerAd 가 잡아두는 높이 — 본문이 배너 뒤로 숨지 않게 같은 값만큼 비워둬요. */
-const BANNER_H = 96;
 
 function CurrentScreen() {
   const { route } = useRouter();
